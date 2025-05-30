@@ -11,24 +11,26 @@ dataset = load_dataset(url, "default")
 # %%
 dataset_train = dataset['train'] # FineTuning 
 dataset_test = dataset['test'] # Testar para saber os scores
-print (dataset_train['tokens'][0])
-print (dataset_train['srl_frames'][0])
-for tokens,frames in zip(dataset_train['tokens'][0],dataset_train['srl_frames'][0]):
-    print(tokens,frames[0])
 
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
-list_of_words = ['_', '«','»', '-']
-new_tokens_list = list()
+def preprocess_tokens (tokens):
+    list_of_wrong_letter = ['_', '«','»', '-']
+    new_tokens_list = list()
 
-for sentence in dataset_train['tokens']:
-    new_tokens = ' '.join(sentence)
-    for word in new_tokens:
-        if word in list_of_words:
-            for wrong_word in list_of_words:
-                new_tokens = new_tokens.replace(wrong_word, ' ')
-    new_tokens_list.append(new_tokens)
+    for sentence in tokens['tokens']:
+        new_tokens = ' '.join(sentence)
+        for letter in new_tokens:
+            if letter in list_of_wrong_letter:
+                for wrong_letter in list_of_wrong_letter:
+                    new_tokens = new_tokens.replace(wrong_letter, ' ')
+        list_words = new_tokens.split()  
+        formated_list = [sentence for sentence in list_words] # Add 
+        new_tokens_list.append(formated_list)
+    return new_tokens_list
 
-print (new_tokens_list) 
 # %%
 
+correct_strings = preprocess_tokens(dataset_train)
+
+print (correct_strings)
