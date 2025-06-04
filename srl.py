@@ -45,14 +45,22 @@ tokenizer = AutoTokenizer.from_pretrained(model)
 
 tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True)
 
-word_ids = tokenized_sentence.word_ids()
+word_ids = tokenized_sentence.word_ids() # Current labels
 
 tokenized_sentence_in_number = tokenized_sentence['input_ids']
 
 tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
 
-#print(tokenized_sentence_in_number)
-#print (tokenized_sentence_in_word)
-
 for word_ids, tokens in zip(word_ids,tokenized_sentence_in_word):
     print (word_ids,tokens)
+
+# %%
+
+# Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##
+
+# Run for all sentences in the list (new_tokens)
+
+# Tokenize sentence and run labels for align with the sentence
+
+
+# %%
