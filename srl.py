@@ -14,7 +14,7 @@ dataset = load_dataset(url, "default")
 
 dataset_train = dataset['train'] # FineTuning 
 dataset_test = dataset['test'] # Testar para saber os scores
-print (dataset_train['tokens'][0])
+print (dataset_train['srl_frames'][0])
 
 # %%
 
@@ -40,23 +40,24 @@ print (sentence00)
 # %%
 
 # Tokenizer
+def starting_to_tokenize ():
+    
+    tokenizer = AutoTokenizer.from_pretrained(model)
 
-tokenizer = AutoTokenizer.from_pretrained(model)
+    tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True)
 
-tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True)
+    word_ids = tokenized_sentence.word_ids() # Current labels
 
-word_ids = tokenized_sentence.word_ids() # Current labels
+    tokenized_sentence_in_number = tokenized_sentence['input_ids']
 
-tokenized_sentence_in_number = tokenized_sentence['input_ids']
+    tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
 
-tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
-
-for word_ids, tokens in zip(word_ids,tokenized_sentence_in_word):
-    print (word_ids,tokens)
+    for word_ids, tokens in zip(word_ids,tokenized_sentence_in_word):
+        print (word_ids,tokens)
 
 # %%
 
-# Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##
+# Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##    
 
 # Run for all sentences in the list (new_tokens)
 
