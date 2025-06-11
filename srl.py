@@ -13,10 +13,9 @@ dataset = load_dataset(url, "default")
 # %%
 
 dataset_train = dataset['train'] # FineTuning 
-dataset_test = dataset['test'] # Testar para saber os scores
-srl_frames00 = dataset_train['srl_frames'][0][0]
-print (srl_frames00['frames'])
-
+dataset_test = dataset['test']
+srl_frames00 = dataset_train['srl_frames'][0][0]['frames']
+print (srl_frames00)
 # %%
 
 # Tratando alguns caracteres que podem dar erro na tokenizacao
@@ -36,37 +35,45 @@ def preprocess_tokens (tokens):
     return new_tokens_list
 
 new_tokens = preprocess_tokens(dataset_train)
-sentence00 = new_tokens[0]
-print (sentence00)
+
 # %%
 
 # Tokenizer
-def starting_to_tokenize ():
-    
+def tokenize_and_align_labels (sentences,dataset_train):
+
+    new_labels = list ()
+    sentence00 = sentences[0]
+    srl_frames00 = dataset_train['srl_frames'][0][0]['frames']
+
     tokenizer = AutoTokenizer.from_pretrained(model)
 
     tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True, return_offsets_mapping=True)
 
-    word_ids = tokenized_sentence.word_ids() # Current labels
+    words_ids = tokenized_sentence.word_ids()
+    print (words_ids)
 
     tokenized_sentence_in_number = tokenized_sentence['input_ids']
 
     tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
 
-    for word_ids in word_ids:
-        list_of_new_srl_frames = list () # List for new tokens
-        if word_ids is 'None':
-            pass
+    for word_id in words_ids:
+        prev_word_id = None
 
+        if word_id is None:
+            new_labels.append('O')
+        elif word_id != prev_word_id:
+            new_labels.append(srl_frames00[word_id])
+        else:
+            print('Subtoken Repetido')
+            new_labels.append('O')
+        
+        prev_word_id = word_id
+        #print (f'DEBUG 2: {prev_word_id}')
 
-    #for frames in srl_frames00['frames']:
-        #print (frames)
-    
-    for word_ids, tokens in zip(word_ids,tokenized_sentence_in_word):
-        print (word_ids,tokens)
-    
+    print (new_labels)
 
-starting_to_tokenize()
+tokenize_and_align_labels(new_tokens,dataset_train)
+
 # %%
 
 # Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##    
