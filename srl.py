@@ -14,7 +14,8 @@ dataset = load_dataset(url, "default")
 
 dataset_train = dataset['train'] # FineTuning 
 dataset_test = dataset['test'] # Testar para saber os scores
-print (dataset_train['srl_frames'][0])
+srl_frames00 = dataset_train['srl_frames'][0][0]
+print (srl_frames00['frames'])
 
 # %%
 
@@ -44,7 +45,7 @@ def starting_to_tokenize ():
     
     tokenizer = AutoTokenizer.from_pretrained(model)
 
-    tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True)
+    tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True, return_offsets_mapping=True)
 
     word_ids = tokenized_sentence.word_ids() # Current labels
 
@@ -52,9 +53,20 @@ def starting_to_tokenize ():
 
     tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
 
+    for word_ids in word_ids:
+        list_of_new_srl_frames = list () # List for new tokens
+        if word_ids is 'None':
+            pass
+
+
+    #for frames in srl_frames00['frames']:
+        #print (frames)
+    
     for word_ids, tokens in zip(word_ids,tokenized_sentence_in_word):
         print (word_ids,tokens)
+    
 
+starting_to_tokenize()
 # %%
 
 # Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##    
