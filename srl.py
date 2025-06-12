@@ -42,6 +42,8 @@ new_tokens = preprocess_tokens(dataset_train)
 def tokenize_and_align_labels (sentences,dataset_train):
 
     new_labels = list ()
+    prev_word_id = None
+
     sentence00 = sentences[0]
     srl_frames00 = dataset_train['srl_frames'][0][0]['frames']
 
@@ -50,37 +52,26 @@ def tokenize_and_align_labels (sentences,dataset_train):
     tokenized_sentence = tokenizer(sentence00, padding = True, is_split_into_words=True, return_offsets_mapping=True)
 
     words_ids = tokenized_sentence.word_ids()
-    print (words_ids)
+    #print (words_ids)
 
     tokenized_sentence_in_number = tokenized_sentence['input_ids']
 
     tokenized_sentence_in_word = tokenizer.convert_ids_to_tokens(tokenized_sentence_in_number)
 
     for word_id in words_ids:
-        prev_word_id = None
 
         if word_id is None:
             new_labels.append('O')
         elif word_id != prev_word_id:
             new_labels.append(srl_frames00[word_id])
         else:
-            print('Subtoken Repetido')
             new_labels.append('O')
         
         prev_word_id = word_id
-        #print (f'DEBUG 2: {prev_word_id}')
 
-    print (new_labels)
+    for wordsss, labels in zip (words_ids,new_labels):
+        print (wordsss, labels)
 
 tokenize_and_align_labels(new_tokens,dataset_train)
-
-# %%
-
-# Align labels with tokenizers it's necessary because in tokenizer bert change unknown words for more words with ##    
-
-# Run for all sentences in the list (new_tokens)
-
-# Tokenize sentence and run labels for align with the sentence
-
 
 # %%
