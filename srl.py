@@ -12,9 +12,9 @@ dataset = load_dataset(url, "default")
 
 # %%
 
-dataset_train = dataset['train'] # FineTuning 
+dataset_train = dataset['train'] # para o FineTuning 
 dataset_test = dataset['test']
-srl_frames00 = dataset_train['srl_frames'][0][0]['frames']
+srl_frames00 = dataset_train['srl_frames'][0]
 print (srl_frames00)
 # %%
 
@@ -34,11 +34,9 @@ def preprocess_tokens (tokens):
         new_tokens_list.append(formated_list)
     return new_tokens_list
 
-new_tokens = preprocess_tokens(dataset_train)
+new_tokens = preprocess_tokens(dataset_train) 
 
 # %%
-
-# Tokenizer doing only for one sentence
 
 def tokenize_and_align_labels (sentences,dataset_train):
 
@@ -72,48 +70,48 @@ tokenize_and_align_labels(new_tokens,dataset_train)
 
 # %%
 
-# Trying doing tokenizer for all frames
-
 def tokenize_and_align_labels (sentences,dataset_train):
 
     tokenizer = AutoTokenizer.from_pretrained(model)
-    new_labels = list ()
-    prev_word_id = None
-    frames_correct = list () # List of frames to align
-    tokenized_sentence = list ()
-    words_ids = list ()
+    new_labels_aligned = dict () # Is necessary to have same dict like in start
 
-    for frames in dataset_train['srl_frames']:
-        for framess in frames:
-            print (f"DEBUG 1: {framess}") # OK
-            frames_correct.append (framess['frames'])
+    for index, sentences_to_tokenize in enumerate(sentences):
+        prev_word_id = None
+        tokenized_sentence = list ()
+        new_labels = []
 
-
-    #Tokenizing all sentences
-    for sentences_to_tokenize in sentences:
-        tokenized_sentence.append(tokenizer(sentences_to_tokenize, padding = True, is_split_into_words=True, return_offsets_mapping=True))
-
-    for transform_to_word_ids in tokenized_sentence:
-        words_ids.append(transform_to_word_ids.word_ids())
-
-    for word_id in words_ids:
-        print (word_id)
-
-'''
-    for word_id in words_ids:
-
-        if word_id is None:
-            new_labels.append('O')
-        elif word_id != prev_word_id:
-            new_labels.append(srl_frames00[word_id])
-        else:
-            new_labels.append('O')
+        tokenized_sentence = tokenizer(sentences_to_tokenize, 
+                                            padding = True, 
+                                            is_split_into_words=True, 
+                                            return_offsets_mapping=True)
         
-        prev_word_id = word_id
+        words_ids = tokenized_sentence.word_ids()
 
-    for words, labels in zip (words_ids,new_labels):
-        print (words, labels)
+        frames_for_this_sentence = dataset_train['srl_frames'][index]
+        
+        for word_id in words_ids:
+            if word_id is None:
+                new_labels.append('O')
+            elif word_id != prev_word_id:
+                if word_id < len(frames_for_this_sentence):
+                    new_labels.append(frames_for_this_sentence[word_id])
+                else:
+                    new_labels.append('O')  # word_id inválido para os frames
+            else:
+                new_labels.append('O')
+                
+            prev_word_id = word_id
 
-'''
+        new_labels_aligned[index] = {'frames': new_labels}
+
+        print (new_labels_aligned)
 
 tokenize_and_align_labels(new_tokens,dataset_train)
+
+'''
+    for frames in dataset_train['srl_frames']:
+        for framess in frames:
+            frames_to_align.append (framess['frames']) # list of frames to align in tokenized sentences
+'''
+
+    
