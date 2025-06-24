@@ -12,7 +12,7 @@ dataset = load_dataset(url, "default")
 
 # %%
 
-dataset_train = dataset['train'] # para o FineTuning 
+dataset_train = dataset['train']
 dataset_test = dataset['test']
 srl_frames00 = dataset_train['srl_frames'][0]
 print (srl_frames00)
@@ -73,7 +73,7 @@ tokenize_and_align_labels(new_tokens,dataset_train)
 def tokenize_and_align_labels (sentences,dataset_train):
 
     tokenizer = AutoTokenizer.from_pretrained(model)
-    new_labels_aligned = dict () # Is necessary to have same dict like in start
+    new_labels_aligned = dict ()
 
     for index, sentences_to_tokenize in enumerate(sentences):
         prev_word_id = None
@@ -88,6 +88,7 @@ def tokenize_and_align_labels (sentences,dataset_train):
         words_ids = tokenized_sentence.word_ids()
 
         frames_for_this_sentence = dataset_train['srl_frames'][index]
+        # print (frames_for_this_sentence)
         
         for word_id in words_ids:
             if word_id is None:
@@ -107,11 +108,3 @@ def tokenize_and_align_labels (sentences,dataset_train):
         print (new_labels_aligned)
 
 tokenize_and_align_labels(new_tokens,dataset_train)
-
-'''
-    for frames in dataset_train['srl_frames']:
-        for framess in frames:
-            frames_to_align.append (framess['frames']) # list of frames to align in tokenized sentences
-'''
-
-    
