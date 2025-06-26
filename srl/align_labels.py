@@ -10,7 +10,7 @@ dataset = load_dataset(url, "default")
 
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
-new_tokens = preprocess.preprocess_tokens(dataset['train']) 
+new_tokens = preprocess.preprocess_tokens(dataset['train'])
 
 # %%
 
@@ -46,5 +46,7 @@ def tokenize_and_align_labels (sentences,dataset_train):
             new_labels_aligned[index].append({'verb': verb, 'new_labels': new_labels}) 
 
             print (new_labels_aligned)
+
+            # Aqui provavelmente para cada label eu vou ter que passar para ID
 
 tokenize_and_align_labels(new_tokens,dataset['train'])
