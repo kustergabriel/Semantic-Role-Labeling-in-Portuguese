@@ -1,3 +1,4 @@
+# %%
 def preprocess_tokens (tokens):
     list_of_wrong_letter = ['_', '«','»']
     new_tokens_list = list()

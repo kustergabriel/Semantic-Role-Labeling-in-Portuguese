@@ -12,6 +12,8 @@ dataset = load_dataset(url, "default")
 # Tratando alguns caracteres que podem dar erro na tokenizacao
 new_tokens = preprocess.preprocess_tokens(dataset['train']) 
 
+# %%
+
 def tokenize_and_align_labels (sentences,dataset_train):
     tokenizer = AutoTokenizer.from_pretrained(model)
     new_labels_aligned = dict ()
@@ -20,9 +22,7 @@ def tokenize_and_align_labels (sentences,dataset_train):
         new_labels_aligned[index] = []
 
         tokenized_sentence = tokenizer(sentences_to_tokenize, 
-                                            padding = True, 
-                                            is_split_into_words=True, 
-                                            return_offsets_mapping=True)
+                                        is_split_into_words=True)
         
         words_ids = tokenized_sentence.word_ids()
 
@@ -38,14 +38,13 @@ def tokenize_and_align_labels (sentences,dataset_train):
                 if word_id is None:
                     new_labels.append('O')
                 elif word_id != prev_word_id:
-                    if word_id < len(labels):
-                        new_labels.append(labels[word_id])
-                    else:
-                        new_labels.append('O')  
+                    new_labels.append(labels[word_id])  
                 else:
                     new_labels.append('O')
                 prev_word_id = word_id
 
-            new_labels_aligned[index].append({'verb': verb, 'new_labels': new_labels})
+            new_labels_aligned[index].append({'verb': verb, 'new_labels': new_labels}) 
+
+            print (new_labels_aligned)
 
 tokenize_and_align_labels(new_tokens,dataset['train'])
