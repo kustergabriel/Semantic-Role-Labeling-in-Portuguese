@@ -41,9 +41,7 @@ def tokenize_and_align_labels (sentences,dataset_train):
                 verb = frame['verb']
 
                 for word_id in words_ids:
-                    if word_id is None:
-                        new_labels.append('O')
-                    elif word_id != prev_word_id:
+                    if word_id != prev_word_id and word_id is not None:
                         new_labels.append(labels[word_id])  
                     else:
                         new_labels.append('O')
