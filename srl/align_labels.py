@@ -4,6 +4,7 @@ from transformers import AutoTokenizer
 import preprocess 
 import os
 import json
+import finetunning
 
 # %%
 model = 'neuralmind/bert-base-portuguese-cased' 
@@ -42,15 +43,15 @@ def tokenize_and_align_labels (sentences,dataset_train):
 
                 for word_id in words_ids:
                     if word_id != prev_word_id and word_id is not None:
-                        new_labels.append(labels[word_id])  
+                        new_labels.append(labels[word_id])
                     else:
                         new_labels.append('O')
                     prev_word_id = word_id
+                
+                ids = [finetunning.label2id.get(label, 0) for label in new_labels]
 
-            # Provavelmente aqui eu ja posso trocar de frames para os ids que o finetunner reconhece
- 
                 json.dump(
-                        {'index': index,'verb': verb,'new_labels': new_labels}, f)
+                        {'index': index,'verb': verb,'new_labels': new_labels, 'ids' : ids}, f)
                 f.write('\n')
 
 tokenize_and_align_labels(new_tokens,dataset['train'])
