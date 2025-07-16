@@ -4,20 +4,23 @@ from transformers import AutoTokenizer
 import preprocess 
 import os
 import json
-import finetunning
+import labels2id as labels2id
 
 # %%
 model = 'neuralmind/bert-base-portuguese-cased' 
 url = 'liaad/Propbank-BR'
 dataset = load_dataset(url, "default")
+fullDatasetTrain = dataset['train']
+fullDatasetTest = dataset['test']
 
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
-new_tokens = preprocess.preprocess_tokens(dataset['train'])
+newTokensTrain = preprocess.preprocess_tokens(fullDatasetTrain)
+newTokensTest = preprocess.preprocess_tokens(fullDatasetTest)
 
 # %%
 
-def tokenize_and_align_labels (sentences,dataset_train):
+def tokenize_and_align_labels (sentences,dataset):
     tokenizer = AutoTokenizer.from_pretrained(model)
     new_labels_aligned = dict ()
     debug = 0
@@ -29,11 +32,11 @@ def tokenize_and_align_labels (sentences,dataset_train):
             new_labels_aligned[index] = []
 
             tokenized_sentence = tokenizer(sentences_to_tokenize, 
-                                            is_split_into_words=True)
+            is_split_into_words=True)
             
             words_ids = tokenized_sentence.word_ids()
-
-            frames_for_this_sentence = dataset_train['srl_frames'][index]
+            
+            frames_for_this_sentence = dataset['srl_frames'][index]
 
             for frame in frames_for_this_sentence:
                 prev_word_id = None
@@ -48,10 +51,27 @@ def tokenize_and_align_labels (sentences,dataset_train):
                         new_labels.append('O')
                     prev_word_id = word_id
                 
-                ids = [finetunning.label2id.get(label, 0) for label in new_labels]
+                ids = [labels2id.label2id.get(label, 0) for label in new_labels]
+                
+                # Dicionario 
+                new_labels_aligned = {'index': index,
+                            'verb': verb,
+                            'new_labels': new_labels, 'ids' : ids,
+                            'input_ids' : tokenized_sentence['input_ids'],
+                            'attention_mask' : tokenized_sentence ['attention_mask']
+                            }
+
+                print (new_labels_aligned)
 
                 json.dump(
-                        {'index': index,'verb': verb,'new_labels': new_labels, 'ids' : ids}, f)
+                        {'index': index,
+                            'verb': verb,
+                            'new_labels': new_labels, 'ids' : ids,
+                            'input_ids' : tokenized_sentence['input_ids'],
+                            'attention_mask' : tokenized_sentence ['attention_mask']
+                        }, f)
                 f.write('\n')
 
-tokenize_and_align_labels(new_tokens,dataset['train'])
+
+
+tokenize_and_align_labels(newTokensTrain,fullDatasetTrain)
