@@ -8,7 +8,6 @@ from seqeval.metrics import classification_report, accuracy_score, f1_score, pre
 
 modelFineTuning = AutoModelForTokenClassification.from_pretrained('neuralmind/bert-base-portuguese-cased', num_labels=61)
 data_collator = DataCollatorForTokenClassification(align_labels.tokenizer)
-login("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")
 
 small_train_dataset = align_labels.tokenizedDataset["train"].shuffle(seed=42).select(range(1000))
 small_eval_dataset = align_labels.tokenizedDataset["test"]
