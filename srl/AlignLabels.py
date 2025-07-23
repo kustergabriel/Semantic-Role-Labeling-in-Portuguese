@@ -1,7 +1,7 @@
 # %%
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModel
-import preprocess 
+import srl.PreprocessData as PreprocessData 
 
 # %%
 model_name = "neuralmind/bert-base-portuguese-cased"
@@ -14,8 +14,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
-newTokensTrain = preprocess.preprocess_tokens(fullDatasetTrain)
-newTokensTest = preprocess.preprocess_tokens(fullDatasetTest)
+newTokensTrain = PreprocessData.preprocess_tokens(fullDatasetTrain)
+newTokensTest = PreprocessData.preprocess_tokens(fullDatasetTest)
 
 updatedDatasetTrain = fullDatasetTrain.remove_columns('tokens')
 updatedDatasetTrain = updatedDatasetTrain.add_column('tokens', newTokensTrain)

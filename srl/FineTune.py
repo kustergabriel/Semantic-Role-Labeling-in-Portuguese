@@ -1,16 +1,16 @@
 # %%
 from transformers import AutoModelForTokenClassification, TrainingArguments, Trainer, DataCollatorForTokenClassification
 from huggingface_hub import login
-import align_labels
+import srl.AlignLabels as AlignLabels
 from seqeval.metrics import classification_report, accuracy_score, f1_score, precision_score, recall_score
 
 
 
 modelFineTuning = AutoModelForTokenClassification.from_pretrained('neuralmind/bert-base-portuguese-cased', num_labels=61)
-data_collator = DataCollatorForTokenClassification(align_labels.tokenizer)
+data_collator = DataCollatorForTokenClassification(AlignLabels.tokenizer)
 
-small_train_dataset = align_labels.tokenizedDataset["train"].shuffle(seed=42).select(range(1000))
-small_eval_dataset = align_labels.tokenizedDataset["test"]
+small_train_dataset = AlignLabels.tokenizedDataset["train"].shuffle(seed=42).select(range(1000))
+small_eval_dataset = AlignLabels.tokenizedDataset["test"]
 
 
 def compute_metrics(p):
@@ -18,11 +18,11 @@ def compute_metrics(p):
     predictions = predictions.argmax(-1)
 
     true_predictions = [
-        [align_labels.label_list[pred] for pred, label in zip(prediction, label) if label != -100]
+        [AlignLabels.label_list[pred] for pred, label in zip(prediction, label) if label != -100]
         for prediction, label in zip(predictions, labels)
     ]
     true_labels = [
-        [align_labels.label_list[label] for pred, label in zip(prediction, label) if label != -100]
+        [AlignLabels.label_list[label] for pred, label in zip(prediction, label) if label != -100]
         for prediction, label in zip(predictions, labels)
     ]
 
@@ -51,7 +51,7 @@ trainer = Trainer(
     args=training_args,
     train_dataset=small_train_dataset,
     eval_dataset=small_eval_dataset,
-    processing_class=align_labels.tokenizer,
+    processing_class=AlignLabels.tokenizer,
     data_collator=data_collator,
     compute_metrics=compute_metrics
 )
