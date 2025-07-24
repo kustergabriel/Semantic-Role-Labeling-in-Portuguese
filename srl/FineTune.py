@@ -53,7 +53,7 @@ trainer = Trainer(
     eval_dataset=small_eval_dataset,
     processing_class=AlignLabels.tokenizer,
     data_collator=data_collator,
-    compute_metrics=compute_metrics
+    #compute_metrics=compute_metrics
 )
 
 # %%
