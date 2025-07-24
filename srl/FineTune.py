@@ -12,7 +12,7 @@ data_collator = DataCollatorForTokenClassification(AlignLabels.tokenizer)
 small_train_dataset = AlignLabels.tokenizedDataset["train"].shuffle(seed=42).select(range(1000))
 small_eval_dataset = AlignLabels.tokenizedDataset["test"]
 
-
+# Nao usei essa parte aqui
 def compute_metrics(p):
     predictions, labels = p
     predictions = predictions.argmax(-1)
