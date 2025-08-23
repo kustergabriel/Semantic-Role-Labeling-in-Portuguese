@@ -5,7 +5,6 @@ import srl.AlignLabels as AlignLabels
 from seqeval.metrics import classification_report, accuracy_score, f1_score, precision_score, recall_score
 
 
-
 modelFineTuning = AutoModelForTokenClassification.from_pretrained('neuralmind/bert-base-portuguese-cased', num_labels=61)
 data_collator = DataCollatorForTokenClassification(AlignLabels.tokenizer)
 

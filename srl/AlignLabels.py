@@ -1,16 +1,40 @@
 # %%
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModel
-import srl.PreprocessData as PreprocessData 
+import PreprocessData
 
 # %%
 model_name = "neuralmind/bert-base-portuguese-cased"
 model = AutoModel.from_pretrained(model_name)
 url = 'liaad/Propbank-BR'
-dataset = load_dataset(url, 'flatten')
-fullDatasetTrain = dataset['train']
-fullDatasetTest = dataset['test']
+datasetFlatten = load_dataset(url, 'flatten')
+datasetDefault = load_dataset(url, 'default')
+fullDatasetTrain = datasetFlatten['train']
+fullDatasetTest = datasetFlatten['test']
 tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# %% 
+# Mapear as roles -> Ex.: ARG0 -> 0, etc...
+
+# Pegar os dois datasets.frames e ir juntando os valores
+
+datasetFlattenFrames = datasetFlatten['train']['frames']
+datasetDefaultFrames = datasetDefault['train']['srl_frames']
+framesDefault = (datasetDefaultFrames[0][0]['frames'])
+framesFlatten = (datasetFlattenFrames[0])
+
+escritaArquivo = dict()
+# Fazer para o dataset inteiro para capturar todas as labels
+# Aqui percebi que default pode ter mais de um verbo na pos 1, e flatter é 1 verbo por posicao...
+for framesGeraisDefault, FramesGeraisFlatten in zip(datasetDefaultFrames,datasetFlattenFrames):
+    print (framesGeraisDefault)
+    print (FramesGeraisFlatten)
+
+for framesD, framesF in zip(framesDefault, framesFlatten):
+    if framesD not in escritaArquivo.keys():
+        escritaArquivo[framesD] = framesF
+        with open('arquivo.txt', 'a') as arquivo:
+            arquivo.write(f'{framesD} - {framesF}\n')        
 
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
