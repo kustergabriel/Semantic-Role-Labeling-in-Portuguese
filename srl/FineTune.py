@@ -20,6 +20,7 @@ id2label = {
     55: "I-C-AM-LOC", 56: "I-C-AM-MNR", 57: "I-C-AM-PRD", 58: "I-C-AM-TMP",
     59: "I-C-V", 60: "O"
 }
+
 label2id = {v: k for k, v in id2label.items()}
 
 modelFineTuning = AutoModelForTokenClassification.from_pretrained(
@@ -30,9 +31,9 @@ modelFineTuning = AutoModelForTokenClassification.from_pretrained(
 
 data_collator = DataCollatorForTokenClassification(AlignLabels.tokenizer)
 
-small_train_dataset = AlignLabels.tokenizedDataset["train"].shuffle(seed=42).select(range(1000))
-train_dataset = AlignLabels.tokenizedDataset["train"]
-eval_dataset = AlignLabels.tokenizedDataset["test"]
+small_train_dataset = AlignLabels.updatedDatasetTrain["train"].shuffle(seed=42).select(range(1000))
+train_dataset = AlignLabels.updatedDatasetTrain["train"]
+eval_dataset = AlignLabels.updatedDatasetTrain["test"]
 
 def compute_metrics(p):
     predictions, labels = p
@@ -47,8 +48,8 @@ def compute_metrics(p):
         seq_labels = []
         for p_id, l_id in zip(pred_seq, label_seq):
             if l_id != -100:  # ignora subtokens
-                seq_preds.append(AlignLabels.label_list[p_id])
-                seq_labels.append(AlignLabels.label_list[l_id])
+                seq_preds.append(id2label[p_id])
+                seq_labels.append(id2label[l_id])
         true_predictions.append(seq_preds)
         true_labels.append(seq_labels)
 
@@ -63,10 +64,10 @@ def compute_metrics(p):
 # Nao configurei, apenas peguei do hugging face
 training_args = TrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch", 
+    eval_strategy="epoch",
     learning_rate=2e-5,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     num_train_epochs=3,
     weight_decay=0.01,
     push_to_hub=False,

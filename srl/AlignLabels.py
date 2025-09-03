@@ -68,4 +68,4 @@ def tokenize_and_align_labels (examples):
 # %%
 
 updatedDatasetTrain = datasetFlatten.map(tokenize_and_align_labels, batched=True)
-print (updatedDatasetTrain['train'])
+print (updatedDatasetTrain)
