@@ -20,15 +20,9 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 datasetFlattenFrames = datasetFlatten['train']['frames']
 datasetDefaultFrames = datasetDefault['train']['srl_frames']
-#print (datasetFlattenFrames)
-for frames in datasetFlattenFrames:
-    print (frames)
-
-# %%
 
 escritaArquivo = dict()
 listaFramesDefault = list()
-# Fazer para o dataset inteiro para capturar todas as labels
 # Aqui percebi que default pode ter mais de um verbo na pos 1, e flatten é 1 verbo por posicao...
 for framesGeraisDefault in datasetDefaultFrames:
     for framesEmCadaVerboDefault, framesEmCadaVerboFlatten in zip(framesGeraisDefault, datasetFlattenFrames):
@@ -40,19 +34,7 @@ for framesD, framesF in zip(listaFramesDefault, datasetFlattenFrames):
             escritaArquivo[d] = framesF
             with open('arquivo.txt', 'a') as arquivo:
                 arquivo.write(f'{d} - {f}\n')
-                print ()
-                print(f'{d} - {f}\n')
 
-# %%
-for framesD, framesF in zip(datasetDefaultFrames, datasetFlattenFrames):
-    print (framesF)
-
-'''    
-    if framesD not in escritaArquivo.keys():
-        escritaArquivo[framesD] = framesF
-        with open('arquivo.txt', 'a') as arquivo:
-            arquivo.write(f'{framesD} - {framesF}\n')        
-'''
 # %%
 # Tratando alguns caracteres que podem dar erro na tokenizacao
 newTokensTrain = PreprocessData.preprocess_tokens(fullDatasetTrain)
