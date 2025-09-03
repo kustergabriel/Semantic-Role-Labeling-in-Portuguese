@@ -7,7 +7,7 @@ import PreprocessData
 model_name = "neuralmind/bert-base-portuguese-cased"
 model = AutoModel.from_pretrained(model_name)
 url = 'liaad/Propbank-BR'
-datasetFlatten = load_dataset(url, 'flatten')
+datasetFlatten = load_dataset(url, 'flatten') 
 datasetDefault = load_dataset(url, 'default')
 fullDatasetTrain = datasetFlatten['train']
 fullDatasetTest = datasetFlatten['test']
@@ -15,9 +15,6 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # %% 
 # Mapear as roles -> Ex.: ARG0 -> 0, etc...
-
-# Pegar os dois datasets.frames e ir juntando os valores
-
 datasetFlattenFrames = datasetFlatten['train']['frames']
 datasetDefaultFrames = datasetDefault['train']['srl_frames']
 
@@ -70,5 +67,5 @@ def tokenize_and_align_labels (examples):
     
 # %%
 
-tokenizedDataset = dataset.map(tokenize_and_align_labels, batched=True)
-print (tokenizedDataset['train']['frames'])
+updatedDatasetTrain = datasetFlatten.map(tokenize_and_align_labels, batched=True)
+print (updatedDatasetTrain['train'])
