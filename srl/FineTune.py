@@ -1,8 +1,8 @@
 # %%
 from transformers import AutoModelForTokenClassification, TrainingArguments, Trainer, DataCollatorForTokenClassification
 from huggingface_hub import login
-import AlignLabels
 from seqeval.metrics import classification_report, accuracy_score, f1_score, precision_score, recall_score
+import AlignLabels as al
 
 # %%
 id2label = {
@@ -29,59 +29,75 @@ modelFineTuning = AutoModelForTokenClassification.from_pretrained(
     id2label=id2label,
     label2id=label2id )
 
-data_collator = DataCollatorForTokenClassification(AlignLabels.tokenizer)
+data_collator = DataCollatorForTokenClassification(al.tokenizer)
 
-small_train_dataset = AlignLabels.updatedDatasetTrain["train"].shuffle(seed=42).select(range(1000))
-train_dataset = AlignLabels.updatedDatasetTrain["train"]
-eval_dataset = AlignLabels.updatedDatasetTrain["test"]
+small_train_dataset = al.tokenizedDatasetTrain
+eval_dataset = al.tokenizedDatasetTest
 
-def compute_metrics(p):
-    predictions, labels = p
-    # transforma logits em classes preditas
-    predictions = predictions.argmax(-1)
+def compute_metrics(pred):
+    labels = pred.label_ids
+    preds = pred.predictions.argmax(-1)
 
-    true_predictions = []
     true_labels = []
+    true_preds = []
 
-    for pred_seq, label_seq in zip(predictions, labels):
-        seq_preds = []
-        seq_labels = []
-        for p_id, l_id in zip(pred_seq, label_seq):
-            if l_id != -100:  # ignora subtokens
-                seq_preds.append(id2label[p_id])
-                seq_labels.append(id2label[l_id])
-        true_predictions.append(seq_preds)
-        true_labels.append(seq_labels)
+    for l, p in zip(labels, preds):
+        temp_labels = []
+        temp_preds = []
+        for li, pi in zip(l, p):
+            if li != -100:  # ignora subwords/padding
+                temp_labels.append(id2label[li])
+                temp_preds.append(id2label[pi])
+        true_labels.append(temp_labels)
+        true_preds.append(temp_preds)
 
-    return {
-        "precision": precision_score(true_labels, true_predictions),
-        "recall": recall_score(true_labels, true_predictions),
-        "f1": f1_score(true_labels, true_predictions),
-        "accuracy": accuracy_score(true_labels, true_predictions),
-    }
+    precision = precision_score(true_labels, true_preds)
+    recall = recall_score(true_labels, true_preds)
+    f1 = f1_score(true_labels, true_preds)
 
-# %%
-# Nao configurei, apenas peguei do hugging face
+    print(classification_report(true_labels, true_preds, digits=4))
+
+    return {"precision": precision, "recall": recall, "f1": f1}
+
+
+training_args = TrainingArguments(
+    output_dir="./results",
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    learning_rate=1e-5,            
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    gradient_accumulation_steps=2, 
+    num_train_epochs=8,            
+    weight_decay=0.01,
+    warmup_ratio=0.1,              
+    lr_scheduler_type="linear",
+    logging_dir="./logs",
+    logging_steps=50,
+    report_to="none"               
+)
+
+'''
 training_args = TrainingArguments(
     output_dir="./results",
     eval_strategy="epoch",
     learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
+    num_train_epochs=6,
     weight_decay=0.01,
     push_to_hub=False,
     logging_dir="./logs",
     logging_steps=50,
     save_strategy="epoch"
-)
-
+) Resultado melhor ate agora -> 0.416426
+'''
 trainer = Trainer(
     model=modelFineTuning,
     args=training_args,
-    train_dataset=small_train_dataset,  
+    train_dataset=small_train_dataset,
     eval_dataset=eval_dataset,
-    tokenizer=AlignLabels.tokenizer,   
+    tokenizer=al.tokenizer,
     data_collator=data_collator,
     compute_metrics=compute_metrics
 )
